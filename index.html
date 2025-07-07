@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Semáforo con Cronómetro</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f2f2f2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .semaforo {
+      width: 100px;
+      height: 300px;
+      background: #333;
+      padding: 20px;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      margin-bottom: 20px;
+    }
+
+    .luz {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto;
+      border-radius: 50%;
+      background: #111;
+      opacity: 0.2;
+      transition: opacity 0.3s;
+    }
+
+    .activo {
+      opacity: 1;
+    }
+
+    .rojo.activo { background: red; }
+    .amarillo.activo { background: yellow; }
+    .verde.activo { background: green; }
+
+    .cronometro {
+      font-size: 2em;
+      margin-bottom: 10px;
+    }
+
+    input {
+      width: 60px;
+      padding: 5px;
+      font-size: 1em;
+      margin-right: 10px;
+    }
+
+    button {
+      padding: 5px 10px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="semaforo">
+    <div id="rojo" class="luz rojo"></div>
+    <div id="amarillo" class="luz amarillo"></div>
+    <div id="verde" class="luz verde activo"></div>
+  </div>
+
+  <div class="cronometro" id="cronometro">01:00</div>
+
+  <div class="controls">
+    <label for="tiempoInput">Tiempo (min):</label>
+    <input type="number" id="tiempoInput" value="1" min="1">
+    <button onclick="iniciarSemaforo()">Iniciar</button>
+  </div>
+
+  <script>
+    let totalTiempo = 60; // en segundos
+    let tiempoRestante = 60;
+    let intervalo;
+    const luces = {
+      rojo: document.getElementById('rojo'),
+      amarillo: document.getElementById('amarillo'),
+      verde: document.getElementById('verde')
+    };
+    const cronometro = document.getElementById('cronometro');
+
+    function encenderLuz(color) {
+      Object.values(luces).forEach(l => l.classList.remove('activo'));
+      luces[color].classList.add('activo');
+    }
+
+    function formatearTiempo(segundos) {
+      const min = Math.floor(segundos / 60);
+      const seg = segundos % 60;
+      return `${min.toString().padStart(2, '0')}:${seg.toString().padStart(2, '0')}`;
+    }
+
+    function iniciarSemaforo() {
+      clearInterval(intervalo);
+
+      const minutosIngresados = parseInt(document.getElementById('tiempoInput').value);
+      if (isNaN(minutosIngresados) || minutosIngresados < 1) {
+        alert("Por favor ingresa un número válido de minutos (mínimo 1).");
+        return;
+      }
+
+      totalTiempo = minutosIngresados * 60;
+      tiempoRestante = totalTiempo;
+      cronometro.textContent = formatearTiempo(tiempoRestante);
+      encenderLuz('verde');
+
+      intervalo = setInterval(() => {
+        tiempoRestante--;
+        cronometro.textContent = formatearTiempo(tiempoRestante);
+
+        if (tiempoRestante === Math.floor(totalTiempo / 3)) {
+          encenderLuz('amarillo');
+        }
+
+        if (tiempoRestante <= 0) {
+          encenderLuz('rojo');
+          clearInterval(intervalo);
+        }
+      }, 1000);
+    }
+  </script>
+
+</body>
+</html>
